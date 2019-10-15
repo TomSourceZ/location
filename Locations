@@ -1,0 +1,60 @@
+    public static File f = new File( "plugins/GunGame", "location.yml");
+    public static FileConfiguration cfg = YamlConfiguration.loadConfiguration(f);
+
+    public static void setLocation(Player p, String locname) {
+        double x = p.getLocation().getX();
+        double y = p.getLocation().getY();
+        double z = p.getLocation().getZ();
+        float pitch = p.getLocation().getPitch();
+        float yaw = p.getLocation().getYaw();
+        cfg.set(locname+".world", p.getWorld().getName());
+        cfg.set(locname+".x", x);
+        cfg.set(locname+".y", y);
+        cfg.set(locname+".z", z);
+        cfg.set(locname+".pitch", pitch);
+        cfg.set(locname+".yaw", yaw);
+        try {
+            cfg.save(f);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void teleportLocation(Player p, String locname) {
+        Location loc = null;
+        if(cfg.contains(locname)) {
+            World w = Bukkit.getWorld(cfg.getString(locname+".world"));
+            double x = cfg.getDouble(locname+".x");
+            double y = cfg.getDouble(locname+".y");
+            double z = cfg.getDouble(locname+".z");
+            double pitch = cfg.getDouble(locname+".pitch");
+            double yaw = cfg.getDouble(locname+".yaw");
+            loc = new Location(w, x, y, z, (float) yaw, (float) pitch);
+            p.teleport(loc);
+        } else {
+            p.sendMessage(GunGame.prefix+"§cEs wurde keine passende Location gefunden!");
+        }
+    }
+    
+    //--------------------------------------------------------------------------------------------
+    
+        @Override
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        Player p = (Player)sender;
+        if(sender instanceof Player) {
+            if(cmd.getName().equalsIgnoreCase("setspawn")) {
+                if(p.hasPermission("gg.setspawn")) {
+                    if(args.length == 0) {
+                        Location_File.setLocation(p, "spawn");
+                        p.sendMessage(GunGame.prefix+"§aEs wurde erfolgreich der spawn gesetzt.");
+                    } else {
+                        p.sendMessage(GunGame.prefix+"§cBitte nutze /setspawn");
+                    }
+                }
+            } else {
+                p.sendMessage(GunGame.noperm);
+            }
+        }
+
+        return false;
+    }
